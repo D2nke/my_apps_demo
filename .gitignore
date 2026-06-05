@@ -1,0 +1,8 @@
+# Java
+target/
+*.class
+*.jar
+
+# General
+.env
+*.log
