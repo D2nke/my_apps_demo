@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    uses: D2nke/my_workflows/.github/workflows/test-java.yml@main
+    with:
+      java_version: "17"
+      build_tool: maven
+
+  security:
+    needs: test
+    uses: D2nke/my_workflows/.github/workflows/security-scan.yml@main
+    with:
+      sonar_project_key: my-app-demo-java
+      enable_mend: true
+    secrets:
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
+      mend_api_key: ${{ secrets.MEND_API_KEY }}
+
+  build:
+    needs: security
+    uses: D2nke/my_workflows/.github/workflows/build-docker.yml@main
+    with:
+      image_name: ghcr.io/D2nke/my-app-demo
+    secrets:
+      registry_username: ${{ github.actor }}
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-dev:
+    needs: build
+    uses: D2nke/my_workflows/.github/workflows/deploy.yml@main
+    with:
+      target: server
+      environment: dev
+      image_name: ghcr.io/D2nke/my-app-demo
+    secrets:
+      ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
