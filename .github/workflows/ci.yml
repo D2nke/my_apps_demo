@@ -2,22 +2,24 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["python"]
   pull_request:
-    branches: ["main"]
+    branches: ["python"]
 
 jobs:
   test:
-    uses: D2nke/my_workflows/.github/workflows/test-java.yml@main
+    uses: D2nke/my_workflows/.github/workflows/test-python.yml@main
     with:
-      java_version: "17"
-      build_tool: maven
+      python_version: "3.11"
+      requirements_file: requirements.txt
+      test_path: tests/
+      coverage_fail_under: 70
 
   security:
     needs: test
     uses: D2nke/my_workflows/.github/workflows/security-scan.yml@main
     with:
-      sonar_project_key: my-app-demo-java
+      sonar_project_key: my-apps-demo-python
       enable_mend: true
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN }}
@@ -27,7 +29,7 @@ jobs:
     needs: security
     uses: D2nke/my_workflows/.github/workflows/build-docker.yml@main
     with:
-      image_name: ghcr.io/D2nke/my-app-demo
+      image_name: ghcr.io/D2nke/my-apps-demo-python
     secrets:
       registry_username: ${{ github.actor }}
       registry_password: ${{ secrets.GITHUB_TOKEN }}
@@ -38,6 +40,6 @@ jobs:
     with:
       target: server
       environment: dev
-      image_name: ghcr.io/D2nke/my-app-demo
+      image_name: ghcr.io/D2nke/my-apps-demo-python
     secrets:
       ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}

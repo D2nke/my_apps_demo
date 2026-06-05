@@ -1,12 +1,12 @@
-FROM maven:3.9-eclipse-temurin-17-alpine AS builder
+FROM python:3.11-slim AS builder
 WORKDIR /app
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-COPY src ./src
-RUN mvn package -DskipTests -B
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-FROM eclipse-temurin:17-jre-alpine
+FROM python:3.11-slim
 WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /root/.local /root/.local
+COPY . .
+ENV PATH=/root/.local/bin:$PATH
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["python", "app.py"]
