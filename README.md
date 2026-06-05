@@ -1,4 +1,4 @@
-# my_apps_demo — Python branch
+# Python branch
 
 Demo app showing how to use [my_workflows](https://github.com/D2nke/my_workflows) reusable workflows in a Python (Flask) stack.
 
